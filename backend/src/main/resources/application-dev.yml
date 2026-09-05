@@ -1,0 +1,2 @@
+jwt:
+  secret: ${JWT_SECRET:local-development-only-secret-at-least-32-bytes}
