@@ -30,5 +30,6 @@ management:
       exposure:
         include: health
 server:
+  forward-headers-strategy: framework
   error:
     include-message: never
