@@ -7,12 +7,9 @@
 # Gradle & Build
 .gradle/
 build/
-backend/.gradle/
-backend/build/
 
 # Environment variables
 .env
-backend/.env
 
 # OS / Logs
 *.log
