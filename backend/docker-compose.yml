@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: table_tennis
+      POSTGRES_USER: tt_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tt_password}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - tt_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tt_user -d table_tennis"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+  backend:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/table_tennis
+      SPRING_DATASOURCE_USERNAME: tt_user
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-tt_password}
+      JWT_SECRET: ${JWT_SECRET:-local-development-only-secret-at-least-32-bytes}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+volumes:
+  tt_pg_data:
